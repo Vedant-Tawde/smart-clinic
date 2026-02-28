@@ -1,0 +1,469 @@
+I want to build a full-stack SaaS web application called SmartClinic.
+
+This is an AI-powered real-time patient queue optimization system for small and mid-sized clinics.
+
+Generate a complete production-ready project structure including:
+
+Backend (FastAPI + Python)
+
+Frontend (React + Vite)
+
+PostgreSQL database
+
+Redis for real-time queue state
+
+WebSocket support
+
+AI model integration structure
+
+Doctor fatigue modeling
+
+Adaptive slot buffering system
+
+Cross-doctor load balancing suggestions
+
+Docker-ready structure
+
+Clean modular architecture
+
+The UI must match a minimalistic SaaS dashboard similar to Stripe / Linear / modern health-tech dashboards.
+
+Focus heavily on clean separation of concerns and modular AI + optimization layers.
+
+🏗️ 1️⃣ Project Structure
+
+Generate folder structure like:
+
+smartclinic/
+ ├── backend/
+ │   ├── app/
+ │   │   ├── main.py
+ │   │   ├── models/
+ │   │   ├── schemas/
+ │   │   ├── routes/
+ │   │   ├── services/
+ │   │   ├── ai/
+ │   │   │   ├── duration_predictor.py
+ │   │   │   ├── no_show_predictor.py
+ │   │   │   ├── inflow_forecast.py
+ │   │   │   ├── severity_analyzer.py
+ │   │   │   ├── fatigue_model.py
+ │   │   │   └── buffering_engine.py
+ │   │   ├── optimizer/
+ │   │   │   ├── scheduler.py
+ │   │   │   └── load_balancer.py
+ │   │   ├── websocket/
+ │   │   ├── utils/
+ │   │   └── config.py
+ │   ├── requirements.txt
+ │   └── Dockerfile
+ │
+ ├── frontend/
+ │   ├── src/
+ │   │   ├── components/
+ │   │   ├── pages/
+ │   │   ├── layouts/
+ │   │   ├── services/
+ │   │   ├── hooks/
+ │   │   └── App.jsx
+ │   ├── package.json
+ │   └── vite.config.js
+ │
+ ├── docker-compose.yml
+ └── README.md
+🗄️ 2️⃣ Database Schema (Extended)
+
+Use SQLAlchemy models.
+
+Tables:
+
+patients
+
+id
+
+name
+
+age
+
+visit_type (first_time, follow_up, chronic_management, minor_complaint)
+
+problem_description (TEXT)
+
+ai_severity_score (0–10)
+
+urgency_score
+
+no_show_probability
+
+created_at
+
+doctors
+
+id
+
+name
+
+specialization
+
+working_hours_start
+
+working_hours_end
+
+max_daily_capacity
+
+fatigue_score
+
+last_break_time
+
+appointments
+
+id
+
+patient_id
+
+doctor_id
+
+predicted_duration
+
+scheduled_start
+
+predicted_start
+
+buffer_allocated
+
+status (waiting, in_consultation, completed, cancelled, no_show)
+
+created_at
+
+queue_events
+
+id
+
+event_type
+
+appointment_id
+
+timestamp
+
+🧠 3️⃣ AI Integration Layer (Extended)
+severity_analyzer.py
+
+When a walk-in or emergency is added:
+
+Input:
+
+problem_description (text)
+
+Use NLP model (mock initially) to:
+
+Analyze severity
+
+Output score out of 10
+
+Function:
+
+predict_severity(problem_text) -> float (0-10)
+
+Higher severity automatically pushes patient above lower-rated patients.
+
+duration_predictor.py
+
+Add bias logic:
+
+If visit_type:
+
+first_time → +20% duration bias
+
+follow_up → -10%
+
+chronic_management → +15%
+
+minor_complaint → -15%
+
+Structure for XGBoost integration later.
+
+buffering_engine.py (VERY IMPORTANT)
+
+Adaptive Slot Buffering System:
+
+AI dynamically adjusts:
+
+Buffer time between appointments
+
+Emergency reserve %
+
+Inputs:
+
+Predicted inflow from Prophet
+
+Doctor fatigue score
+
+Historical overrun frequency
+
+Time of day
+
+Rules:
+
+More buffer during peak hours
+
+Increase emergency reserve when predicted inflow high
+
+Reduce buffer when demand low
+
+Function:
+
+calculate_dynamic_buffer(doctor_id, timestamp)
+
+Store buffer in appointment.buffer_allocated.
+
+fatigue_model.py
+
+Doctor Fatigue Detection Model
+
+Tracks:
+
+Continuous consultation streak
+
+Overrun frequency
+
+Time since last break
+
+Output:
+
+fatigue_score (0–100)
+
+break_suggestion (boolean)
+
+Function:
+
+evaluate_fatigue(doctor_id)
+
+If fatigue_score > threshold:
+
+Suggest break window
+
+Increase future buffer allocations automatically
+
+⚙️ 4️⃣ Queue Optimization Engine (Upgraded)
+
+scheduler.py
+
+Implement:
+
+Priority queue sorted by:
+
+ai_severity_score
+
+urgency_score
+
+waiting time
+
+Dynamic recalculation of predicted start times
+
+Incorporate buffer from buffering_engine
+
+Account for fatigue-adjusted capacity
+
+Function:
+
+optimize_queue(doctor_id)
+
+Objective:
+Minimize weighted waiting time while respecting adaptive buffer constraints.
+
+Structure so OR-Tools can replace heuristic later.
+
+🔄 5️⃣ Cross-Doctor Load Balancer
+
+load_balancer.py
+
+If:
+Doctor A overloaded
+Doctor B underutilized
+
+Suggest:
+Auto-transfer of non-specialized cases.
+
+Rules:
+
+Only transfer if specialization matches
+
+Notify admin/staff before reassignment
+
+Function:
+
+suggest_reallocation()
+
+Return suggestions but do not auto-execute without approval.
+
+🖥️ 6️⃣ Frontend Enhancements
+Walk-in / Emergency Form
+
+When clicking Walk-in or Emergency:
+
+Include:
+
+Name
+
+Age
+
+Visit type dropdown
+
+Problem description (large text input)
+
+After submission:
+
+Display AI severity rating out of 10
+
+Show explanation tooltip
+
+Visit Type Section
+
+Include visit_type selector:
+
+First-time visit
+
+Follow-up
+
+Chronic management
+
+Minor complaint
+
+Display estimated duration adjustment dynamically in UI.
+
+Dashboard Additions
+
+Add:
+
+Doctor Fatigue Indicator
+
+Overload Warning Badge
+
+Transfer Suggestion Card
+
+Buffer Visualization on timeline
+
+📊 7️⃣ Updated API Workflow
+
+POST /walkin
+
+Accept problem_description
+
+Run predict_severity()
+
+Adjust urgency
+
+Predict duration (with visit_type bias)
+
+Apply adaptive buffer
+
+Insert in queue
+
+Optimize
+
+Broadcast update
+
+POST /emergency
+
+Same as walkin
+
+Severity auto-maximized if critical keywords detected
+
+POST /appointments
+
+Predict duration
+
+Predict no-show
+
+Apply dynamic buffer
+
+Save
+
+Optimize
+
+Broadcast
+
+GET /fatigue/{doctor_id}
+
+Return fatigue score + break suggestion.
+
+GET /load-balance/suggestions
+
+Return doctor reallocation suggestions.
+
+📈 8️⃣ Analytics Enhancements
+
+GET /analytics should also return:
+
+Fatigue index per doctor
+
+Buffer efficiency metric
+
+Transfer frequency
+
+Severity distribution graph
+
+Peak-hour congestion score
+
+🐳 9️⃣ Docker Setup
+
+Include:
+
+PostgreSQL container
+
+Redis container
+
+Backend container
+
+Frontend container
+
+Ensure:
+
+Redis used for live queue
+
+Environment variables for AI models
+
+Scalable service design
+
+🎯 Non-Functional Requirements (Reinforced)
+
+AI service layer isolated
+
+Fatigue + buffering independent modules
+
+Optimizer replaceable with OR-Tools
+
+Event-driven real-time updates
+
+Clean code organization
+
+Future ML upgrade ready
+
+No hard-coded logic
+
+🧠 Final Instruction to Replit AI
+
+Generate all starter files with working placeholder logic.
+
+Mock AI models but structure code for:
+
+Real ML model loading
+
+Model retraining integration
+
+Future reinforcement learning scheduler
+
+Ensure modular, production-style code.
+
+Focus on:
+Scalability
+Maintainability
+Separation of concerns
+Real-time reliability
+
+add an "add doctor "button in the doctors section
+make sure the notifications button works
+add an admin login page and give in notifications if the doctors are overworked and give an option to give there doctor a 30 min break or assign only non critical patients, lastly make sure the search patient search bar works
+ALSO use this reference images for ui and this is strictly a website which will be used by receptionist at the clinics make sure the profile button works and all the buttons do some job
+also add the database using neon db and build it using a base of prisma and make the .env and then ask me for  the neon db key so that you can connect the app to the database
+also add the database using neon db and build it using a base of prisma and make the .env and then ask me for the neon db key so that you can connect the app to the database
