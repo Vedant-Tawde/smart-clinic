@@ -4,10 +4,7 @@ import { storage } from "./storage";
 import { api } from "../shared/routes";
 import { z } from "zod";
 import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
-import { pool } from "./db";
 
-const PostgresSessionStore = connectPgSimple(session);
 
 declare module 'express-session' {
   interface SessionData {
@@ -20,19 +17,15 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
 
-  // Setup session (Using Postgres store for Serverless persistence)
+  // Setup session
   app.use(session({
-    store: new PostgresSessionStore({
-      pool,
-      createTableIfMissing: true,
-    }),
     secret: process.env.SESSION_SECRET || 'dev_secret_key_123',
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
+      maxAge: 1000 * 60 * 60 * 24 * 7
     }
   }));
 
