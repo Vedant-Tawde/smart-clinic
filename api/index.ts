@@ -6,28 +6,30 @@ import { createServer } from "http";
 
 const app = express();
 
-// Use CORS so the frontend from a different URL can access the backend
 app.use(
     cors({
-        origin: process.env.FRONTEND_URL || true, // Change "true" to your specific frontend URL in production
+        origin: true,
         credentials: true,
     })
 );
 
-app.use(
-    express.json({
-        verify: (req, _res, buf) => {
-            (req as any).rawBody = buf;
-        },
-    })
-);
-
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const httpServer = createServer(app);
 
-// Initialize routes synchronously inside the file
-// Vercel serverless executes the exported app as a request handler
-registerRoutes(httpServer, app).catch(console.error);
+// Store the initialization promise so it only runs once per cold start
+const initPromise = registerRoutes(httpServer, app).catch((err) => {
+    console.error("Route initialization failed:", err);
+});
 
-export default app;
+// Vercel calls this default export as the serverless handler
+// We wait for route initialization before handling any request
+export default async function handler(req: any, res: any) {
+    try {
+        await initPromise;
+    } catch (err) {
+        console.error("Init error:", err);
+    }
+    return app(req, res);
+}

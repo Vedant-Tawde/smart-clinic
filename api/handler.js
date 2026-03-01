@@ -22455,7 +22455,7 @@ var require_route = __commonJS({
         sync = 0;
       }
     };
-    Route.prototype.all = function all(handler) {
+    Route.prototype.all = function all(handler2) {
       const callbacks = flatten.call(slice.call(arguments), Infinity);
       if (callbacks.length === 0) {
         throw new TypeError("argument handler is required");
@@ -22473,7 +22473,7 @@ var require_route = __commonJS({
       return this;
     };
     methods.forEach(function(method) {
-      Route.prototype[method] = function(handler) {
+      Route.prototype[method] = function(handler2) {
         const callbacks = flatten.call(slice.call(arguments), Infinity);
         if (callbacks.length === 0) {
           throw new TypeError("argument handler is required");
@@ -22676,17 +22676,17 @@ var require_router = __commonJS({
         }
       }
     };
-    Router.prototype.use = function use(handler) {
+    Router.prototype.use = function use(handler2) {
       let offset = 0;
       let path = "/";
-      if (typeof handler !== "function") {
-        let arg = handler;
+      if (typeof handler2 !== "function") {
+        let arg = handler2;
         while (Array.isArray(arg) && arg.length !== 0) {
           arg = arg[0];
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path = handler;
+          path = handler2;
         }
       }
       const callbacks = flatten.call(slice.call(arguments, offset), Infinity);
@@ -32859,7 +32859,7 @@ var require_express_session = __commonJS({
 // api/index.ts
 var index_exports = {};
 __export(index_exports, {
-  default: () => index_default
+  default: () => handler
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -44414,22 +44414,24 @@ var import_http = require("http");
 var app = (0, import_express.default)();
 app.use(
   (0, import_cors.default)({
-    origin: process.env.FRONTEND_URL || true,
-    // Change "true" to your specific frontend URL in production
+    origin: true,
     credentials: true
   })
 );
-app.use(
-  import_express.default.json({
-    verify: (req, _res, buf) => {
-      req.rawBody = buf;
-    }
-  })
-);
+app.use(import_express.default.json());
 app.use(import_express.default.urlencoded({ extended: false }));
 var httpServer = (0, import_http.createServer)(app);
-registerRoutes(httpServer, app).catch(console.error);
-var index_default = app;
+var initPromise = registerRoutes(httpServer, app).catch((err) => {
+  console.error("Route initialization failed:", err);
+});
+async function handler(req, res) {
+  try {
+    await initPromise;
+  } catch (err) {
+    console.error("Init error:", err);
+  }
+  return app(req, res);
+}
 /*! Bundled license information:
 
 depd/index.js:
