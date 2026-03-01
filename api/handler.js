@@ -43853,11 +43853,9 @@ var insertQueueEventSchema = createInsertSchema(queueEvents).omit({ id: true, ti
 // server/db.ts
 var { Pool: Pool3 } = esm_default;
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?"
-  );
+  console.error("WARNING: DATABASE_URL is not set. Database operations will fail.");
 }
-var pool = new Pool3({ connectionString: process.env.DATABASE_URL });
+var pool = new Pool3({ connectionString: process.env.DATABASE_URL || "" });
 var db = drizzle(pool, { schema: schema_exports });
 
 // server/storage.ts
