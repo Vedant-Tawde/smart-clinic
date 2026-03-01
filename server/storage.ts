@@ -6,7 +6,7 @@ import {
   type Patient, type InsertPatient,
   type Appointment, type InsertAppointment,
   type QueueEvent, type InsertQueueEvent
-} from "@shared/schema";
+} from "../shared/schema";
 import { eq, ilike } from "drizzle-orm";
 
 export interface IStorage {
