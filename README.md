@@ -84,18 +84,26 @@ Alternatives Considered
 Evaluation Metrics
 
 8. Technology Stack
-Frontend
+Frontend:
+React 18 (with TypeScript)
+Vite (build tool)
+TailwindCSS + shadcn/ui (component library)
+TanStack Query (React Query) for data fetching
+Wouter (lightweight routing)
+Framer Motion (animations)
+Recharts (charts/analytics)
+React Hook Form + Zod (form validation)
 
 
-Backend
-ML/AI
+Backend:
+Node.js + Express 5
+TypeScript (via tsx)
+Drizzle ORM
+express-session (authentication)
+Zod (API schema validation)
 
-
-Database
-
-
-Deployment
-
+Database:
+PostgreSQL (hosted on Neon — serverless Postgres)
 
 
 9. API Documentation & Testing
