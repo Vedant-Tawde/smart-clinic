@@ -192,3 +192,9 @@ Improve doctor productivity
 Optimize clinic revenue
 Bring AI-driven efficiency to primary healthcare
 
+
+LIVE DEMO VIDEO LINK: https://drive.google.com/file/d/1gsFgBdw113Pd7jrE8sQO8rzbRmAuyPYm/view?usp=sharing
+
+PPT LINK: https://www.canva.com/design/DAHCrTmx4pY/MpL6SBu5iSNcNsGNH7nNMQ/view?utm_content=DAHCrTmx4pY&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h3f3a55f8c9
+
+DEPLOYMENT LINK: smart-clinic-gamma.vercel.app
