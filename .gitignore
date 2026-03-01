@@ -120,3 +120,6 @@ dist-ssr/
 # Replit
 .replit
 .local/
+
+# Vercel build artifacts
+api/handler.js

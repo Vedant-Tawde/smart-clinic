@@ -1,14 +1,15 @@
 {
     "version": 2,
-    "functions": {
-        "api/index.ts": {
-            "includeFiles": "server/**,shared/**"
+    "builds": [
+        {
+            "src": "api/handler.js",
+            "use": "@vercel/node"
         }
-    },
+    ],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "api/index.ts"
+            "dest": "api/handler.js"
         }
     ]
 }
