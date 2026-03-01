@@ -13,10 +13,10 @@ export default function Doctors() {
   const { mutate: createDoctor, isPending: isCreating } = useCreateDoctor();
   const { mutate: giveBreak, isPending: isBreaking } = useGiveBreak();
   const { toast } = useToast();
-  
+
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    name: "abc",
     specialization: "General Practice",
     workingHoursStart: "09:00",
     workingHoursEnd: "17:00",
@@ -47,7 +47,7 @@ export default function Doctors() {
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Medical Staff</h1>
           <p className="text-slate-500 mt-1">Manage doctors, monitor fatigue, and allocate breaks.</p>
         </div>
-        
+
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button className="rounded-xl shadow-md shadow-primary/20">
@@ -63,26 +63,26 @@ export default function Doctors() {
                 <Label>Last Name</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">Dr.</span>
-                  <Input required className="pl-9 rounded-xl" value={formData.name} onChange={e => setFormData(f => ({...f, name: e.target.value}))} />
+                  <Input required className="pl-9 rounded-xl" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Specialization</Label>
-                <Input required className="rounded-xl" value={formData.specialization} onChange={e => setFormData(f => ({...f, specialization: e.target.value}))} />
+                <Input required className="rounded-xl" value={formData.specialization} onChange={e => setFormData(f => ({ ...f, specialization: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Start Time</Label>
-                  <Input type="time" required className="rounded-xl" value={formData.workingHoursStart} onChange={e => setFormData(f => ({...f, workingHoursStart: e.target.value}))} />
+                  <Input type="time" required className="rounded-xl" value={formData.workingHoursStart} onChange={e => setFormData(f => ({ ...f, workingHoursStart: e.target.value }))} />
                 </div>
                 <div className="space-y-2">
                   <Label>End Time</Label>
-                  <Input type="time" required className="rounded-xl" value={formData.workingHoursEnd} onChange={e => setFormData(f => ({...f, workingHoursEnd: e.target.value}))} />
+                  <Input type="time" required className="rounded-xl" value={formData.workingHoursEnd} onChange={e => setFormData(f => ({ ...f, workingHoursEnd: e.target.value }))} />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Daily Capacity (Patients)</Label>
-                <Input type="number" required className="rounded-xl" value={formData.maxDailyCapacity} onChange={e => setFormData(f => ({...f, maxDailyCapacity: e.target.value}))} />
+                <Input type="number" required className="rounded-xl" value={formData.maxDailyCapacity} onChange={e => setFormData(f => ({ ...f, maxDailyCapacity: e.target.value }))} />
               </div>
               <Button type="submit" disabled={isCreating} className="w-full rounded-xl">
                 {isCreating ? "Adding..." : "Add Doctor"}
@@ -118,24 +118,24 @@ export default function Doctors() {
                   <span className="text-slate-500">Capacity</span>
                   <span className="font-medium">{doctor.maxDailyCapacity} pts/day</span>
                 </div>
-                
+
                 <div className="pt-2">
                   <div className="flex justify-between text-sm mb-1.5">
                     <span className="text-slate-600 font-medium">Fatigue Level</span>
                     <span className={`font-bold ${doctor.fatigueScore > 80 ? 'text-red-600' : 'text-slate-700'}`}>{doctor.fatigueScore}%</span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className={`h-full rounded-full transition-all duration-500 ${doctor.fatigueScore > 80 ? 'bg-red-500' : doctor.fatigueScore > 50 ? 'bg-amber-400' : 'bg-emerald-400'}`}
                       style={{ width: `${doctor.fatigueScore}%` }}
                     />
                   </div>
                 </div>
               </div>
-              
+
               <div className="pt-4 border-t border-slate-100">
-                <Button 
-                  variant={doctor.isOverworked ? "default" : "outline"} 
+                <Button
+                  variant={doctor.isOverworked ? "default" : "outline"}
                   className={`w-full rounded-xl ${doctor.isOverworked ? 'bg-amber-500 hover:bg-amber-600 text-white border-0' : ''}`}
                   onClick={() => {
                     giveBreak(doctor.id, {

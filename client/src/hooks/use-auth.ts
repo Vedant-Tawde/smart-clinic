@@ -25,7 +25,7 @@ export function useLogin() {
         body: JSON.stringify(data),
         credentials: "include",
       });
-      
+
       if (!res.ok) {
         if (res.status === 401) {
           const error = api.auth.login.responses[401].parse(await res.json());
@@ -34,6 +34,32 @@ export function useLogin() {
         throw new Error("Failed to login");
       }
       return api.auth.login.responses[200].parse(await res.json());
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.auth.me.path] });
+    },
+  });
+}
+
+export function useSignup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: z.infer<typeof api.auth.signup.input>) => {
+      const res = await fetch(api.auth.signup.path, {
+        method: api.auth.signup.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        if (res.status === 400) {
+          const error = api.auth.signup.responses[400].parse(await res.json());
+          throw new Error(error.message);
+        }
+        throw new Error("Failed to sign up");
+      }
+      return api.auth.signup.responses[201].parse(await res.json());
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.auth.me.path] });

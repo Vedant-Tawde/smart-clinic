@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { 
-  insertUserSchema, 
-  insertDoctorSchema, 
-  insertPatientSchema, 
+import {
+  insertUserSchema,
+  insertDoctorSchema,
+  insertPatientSchema,
   insertAppointmentSchema,
   doctors,
   patients,
@@ -45,6 +45,15 @@ export const api = {
       responses: {
         200: z.object({ message: z.string() }),
         401: errorSchemas.unauthorized,
+      },
+    },
+    signup: {
+      method: 'POST' as const,
+      path: '/api/signup' as const,
+      input: insertUserSchema,
+      responses: {
+        201: z.object({ message: z.string() }),
+        400: errorSchemas.validation,
       },
     },
     logout: {

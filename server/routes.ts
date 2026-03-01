@@ -15,7 +15,7 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  
+
   // Setup session
   app.use(session({
     secret: process.env.SESSION_SECRET || 'dev_secret_key_123',
@@ -25,18 +25,36 @@ export async function registerRoutes(
   }));
 
   // Auth Routes
+  app.post(api.auth.signup.path, async (req, res) => {
+    try {
+      const input = api.auth.signup.input.parse(req.body);
+      const existing = await storage.getUserByUsername(input.username);
+
+      if (existing) {
+        return res.status(400).json({ message: "Username already exists", field: "username" });
+      }
+
+      const user = await storage.createUser({ username: input.username, password: input.password });
+      req.session.userId = user.id;
+
+      return res.status(201).json({ message: "Account created successfully" });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message, field: err.errors[0].path.join('.') });
+      }
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   app.post(api.auth.login.path, async (req, res) => {
     try {
       const input = api.auth.login.input.parse(req.body);
-      let user = await storage.getUserByUsername(input.username);
-      
-      // For demo purposes, we automatically create the user if they don't exist
-      if (!user) {
-        user = await storage.createUser({ username: input.username, password: input.password });
-      } else if (user.password !== input.password) {
+      const user = await storage.getUserByUsername(input.username);
+
+      if (!user || user.password !== input.password) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      
+
       req.session.userId = user.id;
       return res.status(200).json({ message: "Logged in successfully" });
     } catch (err) {
@@ -97,7 +115,7 @@ export async function registerRoutes(
 
   app.post(api.doctors.giveBreak.path, async (req, res) => {
     const id = Number(req.params.id);
-    const updated = await storage.updateDoctor(id, { 
+    const updated = await storage.updateDoctor(id, {
       lastBreakTime: new Date(),
       fatigueScore: 0,
       isOverworked: false
@@ -110,7 +128,7 @@ export async function registerRoutes(
     const id = Number(req.params.id);
     const doctor = await storage.getDoctor(id);
     if (!doctor) return res.status(404).json({ message: "Doctor not found" });
-    
+
     // Simulate fatigue logic based on capacity vs last break
     res.json({
       fatigueScore: doctor.fatigueScore,
@@ -134,7 +152,7 @@ export async function registerRoutes(
   app.post(api.patients.walkin.path, async (req, res) => {
     try {
       const input = api.patients.walkin.input.parse(req.body);
-      
+
       // Basic AI Simulation for Severity
       let severityScore = input.isEmergency ? 10 : 3;
       if (input.problemDescription.toLowerCase().includes("pain")) severityScore += 2;
@@ -142,7 +160,7 @@ export async function registerRoutes(
       severityScore = Math.min(10, severityScore);
 
       let urgencyScore = severityScore * 2;
-      
+
       const patient = await storage.createPatient({
         name: input.name,
         age: input.age,
@@ -206,7 +224,7 @@ export async function registerRoutes(
       const id = Number(req.params.id);
       const updated = await storage.updateAppointmentStatus(id, input.status);
       if (!updated) return res.status(404).json({ message: "Appointment not found" });
-      
+
       // Log event
       await storage.createQueueEvent({
         appointmentId: updated.id,
@@ -232,7 +250,7 @@ export async function registerRoutes(
     }));
 
     const activeConsultations = queue.filter(q => q.status === "in_consultation").length;
-    
+
     res.json({
       doctors: docs,
       queue,
