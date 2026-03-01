@@ -123,3 +123,4 @@ dist-ssr/
 
 # Vercel build artifacts
 api/handler.js
+dist/public
